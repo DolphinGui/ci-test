@@ -1,0 +1,30 @@
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  
+permissions:
+  pull-requests: write
+  contents: write
+
+concurrency:
+  group: preview-pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      name: Checkout
+    - name: Install poetry
+      uses: abatilo/actions-poetry@v2
+    - name: Install the project dependencies
+      run: poetry install --no-root
+    - name: Build documentation
+      run: poetry run mkdocs build
+    - uses: rajyan/preview-pages@v1
+      name: Preview Pages
+      with:
+        source-dir: site
